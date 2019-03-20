@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ApiTaskSchedule.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,9 +14,9 @@ namespace ApiTaskSchedule.DB
         }
         public Guid Id { get; set; }
         public Guid OwnerId { get; set; }
-        public int Status { get; set; }
+        public JobStatus Status { get; set; }
         public int PercentCompleted { get; set; }
-        public int Type { get; set; }
+        public JobType Type { get; set; }
         public IEnumerable<JobOutput> JobOutputs { get; set; }
     }
 }

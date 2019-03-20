@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApiTaskSchedule.DB;
+using ApiTaskSchedule.Job;
+using ApiTaskSchedule.Services;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,6 +33,9 @@ namespace ApiTaskSchedule
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<TaskSchedulerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddHangfire(config => config.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddTransient<IScheduler, Scheduler>(); 
+            services.AddTransient<IJobPersister, JobPersister>(); 
+            services.AddTransient<StartEngineJob>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
