@@ -20,7 +20,7 @@ namespace ApiTaskSchedule.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var jobs = new List<ApiTaskSchedule.DB.Job> { new ApiTaskSchedule.DB.Job { Type = Enum.JobType.Default } };
+            var jobs = new List<ApiTaskSchedule.DB.Job> { new ApiTaskSchedule.DB.Job { Name="test job", Description="Test job description", JobOutputs = new List<JobOutput> { new JobOutput { Content = "test", Time = DateTime.Now } }, Type = Enum.JobType.Default } };
             return Ok(jobs);
         }
 

@@ -34,7 +34,7 @@ namespace ApiTaskSchedule
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
-                    builder => builder.WithOrigins("http://localhost:4200")
+                    builder => builder.WithOrigins("http://localhost:4200", "http://127.0.0.1:8080")
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
