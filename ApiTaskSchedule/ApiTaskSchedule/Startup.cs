@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApiTaskSchedule.DB;
+using ApiTaskSchedule.Hubs;
 using ApiTaskSchedule.Job;
 using ApiTaskSchedule.Services;
 using Hangfire;
@@ -30,12 +31,21 @@ namespace ApiTaskSchedule
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.WithOrigins("http://localhost:4200")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+            });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<TaskSchedulerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddHangfire(config => config.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection")));
             services.AddTransient<IScheduler, Scheduler>(); 
             services.AddTransient<IJobPersister, JobPersister>(); 
             services.AddTransient<StartEngineJob>();
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +62,12 @@ namespace ApiTaskSchedule
             app.UseHangfireServer();
             app.UseHangfireDashboard();
             app.UseHttpsRedirection();
+            app.UseCors("CorsPolicy");
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<JobHub>("/jobs");
+            });
+
             app.UseMvc();
         }
     }
