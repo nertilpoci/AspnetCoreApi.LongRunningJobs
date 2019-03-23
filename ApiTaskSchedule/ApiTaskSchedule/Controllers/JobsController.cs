@@ -5,6 +5,12 @@ using System.Threading.Tasks;
 using ApiTaskSchedule.Services;
 using Microsoft.AspNetCore.Mvc;
 using ApiTaskSchedule.DB;
+using ApiTaskSchedule.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using ApiTaskSchedule.Models;
+using ApiTaskSchedule.Enum;
+using ApiTaskSchedule.Jobs;
+
 namespace ApiTaskSchedule.Controllers
 {
     [Route("api/[controller]")]
@@ -12,17 +18,29 @@ namespace ApiTaskSchedule.Controllers
     public class JobsController : ControllerBase
     {
         IScheduler _scheduler;
-        public JobsController(IScheduler scheduler)
+        IHubContext<JobHub> _hubContext;
+        static Guid jobId = Guid.NewGuid();
+        public JobsController(IScheduler scheduler, IHubContext<JobHub> hubContext)
         {
             _scheduler = scheduler;
+            _hubContext = hubContext;
+            
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            var jobs = new List<ApiTaskSchedule.DB.Job> { new ApiTaskSchedule.DB.Job { Name="test job", Description="Test job description", JobOutputs = new List<JobOutput> { new JobOutput { Content = "test", Time = DateTime.Now } }, Type = Enum.JobType.Default } };
-            return Ok(jobs);
+            return Ok(_scheduler.Jobs(z=>z.Status!= JobStatus.Finished));
         }
+
+        [HttpGet]
+        [Route("create")]
+        public async Task<IActionResult> Create()
+        {
+             _scheduler.Schedule<StartEngineJob>();
+            return Ok();
+        }
+        
 
     }
 }

@@ -14,27 +14,36 @@ namespace ApiTaskSchedule.DB
        : base(options)
     {
     }
-    public virtual DbSet<Job> Jobs { get; set; }
-        public virtual DbSet<JobOutput> JobOutputs { get; set; }
-        
+
+
+        public virtual DbSet<Jobs> Jobs { get; set; }
+        public virtual DbSet<JobOutputs> JobOutputs { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-          
 
-            modelBuilder.Entity<Job>(entity =>
+            modelBuilder.Entity<JobOutputs>(entity =>
             {
+                entity.HasIndex(e => e.JobId);
+
                 entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
-            });
-            modelBuilder.Entity<JobOutput>(entity =>
-            {
-                entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+
+                entity.Property(e => e.Time).HasDefaultValueSql("('0001-01-01T00:00:00.0000000')");
+
                 entity.HasOne(d => d.Job)
                     .WithMany(p => p.JobOutputs)
                     .HasForeignKey(d => d.JobId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Job_JobOutputs");
             });
-            
+
+            modelBuilder.Entity<Jobs>(entity =>
+            {
+                entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            });
+
+
         }
     }
 
