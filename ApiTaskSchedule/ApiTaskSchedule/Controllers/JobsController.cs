@@ -37,7 +37,7 @@ namespace ApiTaskSchedule.Controllers
         [Route("create")]
         public async Task<IActionResult> Create()
         {
-             _scheduler.Schedule<StartEngineJob>();
+             _scheduler.Schedule<StartEngineJob, EngineJobData>(new EngineJobData { Name="Start Engine Job" , Description="Starting engine parts", OwnerId= Guid.NewGuid()  });
             return Ok();
         }
         

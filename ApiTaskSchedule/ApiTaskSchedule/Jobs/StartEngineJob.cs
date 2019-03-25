@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 namespace ApiTaskSchedule.Jobs
 {
     [AutomaticRetry(Attempts = 0)]
-    public class StartEngineJob: JobBase
+    public class StartEngineJob : JobBase<EngineJobData>
     {
         public StartEngineJob (IJobPersister jobPersister ) : base(jobPersister) {
-            this.Name = "Start engine job";
+           
         }
 
-        public async override Task Run()
+        public async override Task Run(EngineJobData data)
         {
             
             await SetStatus(Enum.JobStatus.Running);
@@ -33,5 +33,12 @@ namespace ApiTaskSchedule.Jobs
             await SetPercent(100);
             await SetStatus(Enum.JobStatus.Finished);
         }
+    }
+
+    public class EngineJobData : IJobData
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public Guid OwnerId { get; set; }
     }
 }

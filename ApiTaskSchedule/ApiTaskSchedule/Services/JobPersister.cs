@@ -12,7 +12,7 @@ namespace ApiTaskSchedule.Services
 {
     public interface IJobPersister
     {
-        Task<DB.Jobs> CreateJob(JobType type, Guid ownerId, string name, DateTime? start);
+        Task<DB.Jobs> CreateJob(JobType type, Guid ownerId, string name,string description, DateTime? start);
         Task AddOuput(Guid jobId, string content);
         Task SetStatus(Guid jobId, JobStatus status);
         Task SetPercent(Guid jobId, int percent);
@@ -70,9 +70,9 @@ namespace ApiTaskSchedule.Services
             var percentangeNotification = new JobUpdateNotification<int> { Type = Enum.JobNotificationType.PercentUpdate, JobId = jobId, Data = percent };
             await _hubContext.Clients.All.SendAsync("onJobInfo", percentangeNotification);
         }
-        public async Task<DB.Jobs> CreateJob(JobType type, Guid ownerId, string name, DateTime? start)
+        public async Task<DB.Jobs> CreateJob(JobType type, Guid ownerId, string name, string description, DateTime? start)
         {
-            var job = new DB.Jobs { Name= name, OwnerId = ownerId, Type = type, Status = JobStatus.Created, PercentCompleted=0, StartTime=start };
+            var job = new DB.Jobs { Name= name,Description= description, OwnerId = ownerId, Type = type, Status = JobStatus.Created, PercentCompleted=0, StartTime=start };
             var entity =await _db.Jobs.AddAsync(job);
             await _db.SaveChangesAsync();
             var newJob = entity.Entity;

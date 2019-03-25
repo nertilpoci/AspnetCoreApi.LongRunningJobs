@@ -11,24 +11,31 @@ using System.Threading.Tasks;
 
 namespace ApiTaskSchedule.Jobs
 {
-    public interface IJob
+    public interface IJob<T> where T : IJobData, new()
     {
          Guid JobId { get; set; }
          JobType Type { get; set; }
-         Task Run();
-         Task BuildAndRun(Guid ownerId);
+        Task Run(T input);
+        Task<JobBase<T>> Build(T input);
+        Task BuildAndRun(T input);
     }
-    public abstract class JobBase : IJob
+    public interface IJobData
     {
-        public string Name { get; set; }
+        string Name { get; set; }
+        string Description { get; set; }
+        Guid OwnerId { get; set; }
+    }
+    public abstract class JobBase<T> : IJob<T> where T : IJobData, new()
+    {
         public Guid JobId { get; set; } 
-        public Guid OwnerId { get; set; }
         public JobType Type { get; set; } = JobType.Default;
         private IJobPersister _jobPersister;
         public JobBase(IJobPersister jobPersister)
         {
             _jobPersister = jobPersister;
         }
+
+
         protected async Task AddOuput(string content)
         {
             await _jobPersister.AddOuput(this.JobId, content);
@@ -41,20 +48,20 @@ namespace ApiTaskSchedule.Jobs
         {
             await _jobPersister.SetPercent(this.JobId, percent);
         }
-        public async Task<JobBase> Build()
+        public async Task<JobBase<T>> Build(T input)
         {
-            var job = await _jobPersister.CreateJob(Type, OwnerId, Name,DateTime.UtcNow);
+
+            var job = await _jobPersister.CreateJob(Type,input.OwnerId, input.Name, input.Description, DateTime.UtcNow);
             this.JobId = job.Id;
             return this;
         }
 
-        public abstract  Task Run();
+        public abstract  Task Run(T input);
 
-        public async  Task BuildAndRun(Guid ownerId)
+        public async  Task BuildAndRun(T input)
         {
-            this.OwnerId = ownerId;
-            var job = await this.Build();
-            await job.Run();
+            var job = await this.Build(input);
+            await job.Run(input);
             await _jobPersister.SetEnd(JobId, DateTime.UtcNow);
         }
     }

@@ -73,7 +73,7 @@ namespace ApiTaskSchedule
             }
             app.UseHangfireServer();
             app.UseHangfireDashboard();
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseCors("CorsPolicy");
             app.UseSignalR(routes =>
             {

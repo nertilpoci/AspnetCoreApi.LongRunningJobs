@@ -12,7 +12,7 @@ namespace ApiTaskSchedule.Services
 {
     public interface IScheduler
     {
-        void Schedule<T>() where T : IJob;
+        void Schedule<TJobType, TData>(TData input) where TJobType : IJob<TData> where TData : IJobData, new();
         IEnumerable<DB.Jobs> Jobs(Expression<Func<DB.Jobs, bool>> query);
     }
     public class Scheduler : IScheduler
@@ -27,9 +27,9 @@ namespace ApiTaskSchedule.Services
             if(query==null) return _db.Jobs.Include(z => z.JobOutputs).ToList();
             return _db.Jobs.Where(query).Include(z => z.JobOutputs).ToList();
         }
-        public void Schedule<T>() where T: IJob
+        public void Schedule<TJobType, TData>(TData input) where TJobType : IJob<TData> where TData : IJobData, new()
         {
-            BackgroundJob.Enqueue<T>(  j => j.BuildAndRun(Guid.NewGuid()));
+            BackgroundJob.Enqueue<TJobType>(j => j.BuildAndRun(input));
         }
 
     }
